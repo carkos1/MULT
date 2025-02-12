@@ -110,20 +110,27 @@ def main():
     print("Função para converter para RGB")
     img_rec = YCbCr_to_RGB(img_YCbCr,YCbCr_INV)
 
-    
-    showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
-    showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
-    showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
-    showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
+    print("1-R, G, B\n2-YCbCr\n3-Y, Cb, Cr\n4-Convertida\n0-Sair\n")
+    opt = int(input("Opt: "));
 
-    showImg(img_rec, "Imagem Convertida")
+    while(opt != 0):
+        if opt == 1:
+            showImg(R,"Codificação a Vermelho", cmRed)
+            showImg(G,"Codificação a Verde", cmGreen)
+            showImg(B,"Codificação a Azul", cmBlue)
+        elif opt == 2:
+            showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
+        elif opt == 3:
+            showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
+            showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
+            showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
+        elif opt == 4:
+            showImg(img_rec, "Imagem Convertida")
+        
+        opt = int(input("Opt: "));
+    
     # print("Invertida")
     # print(YCbCr_INV)
-    # showImg(img, "Imagem Descodificada")
-    # showImg(R,"Codificação a Cinzento", cmGray)
-    # showImg(R,"Codificação a Vermelho", cmRed)
-    # showImg(G,"Codificação a Verde", cmGreen)
-    # showImg(B,"Codificação a Azul", cmBlue)
     
     # showImg(imgRec,"Imagem após decoder", cmGray)
 
