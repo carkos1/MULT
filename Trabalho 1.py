@@ -39,32 +39,12 @@ def padding(color):
 
     return color_padded
 
-def removePadding(color):
-    last_col = color[:, -1]
-    previous_col = color[:, -2]
     
-    while np.array_equal(previous_col, last_col):
-        color = np.delete(color, -1, axis=1)  # Removendo a última coluna
-        
-        last_col = color[:, -1]
-        previous_col = color[:, -2]
-
-    last_row = color[-1, :]
-    previous_row = color[-2, :]
-
-    while np.array_equal(previous_row, last_row):
-        color = np.delete(color, -1, axis=0)  # Removendo a última linha
-        
-        last_row = color[-1, :]
-        previous_row = color[-2, :]
-
-    return color
-
-    
-def decoder(R, G, B):
-    R = removePadding(R)
-    G = removePadding(G)
-    B = removePadding(B)
+def decoder(R, G, B, img):
+    x, y, _ = img.shape
+    R = R[:x, :y]
+    G = G[:x, :y]
+    B = B[:x, :y]
     nl, nc = R.shape
     imgRec = np.zeros((nl,nc,3), dtype = np.uint8)
     imgRec[:,:,0] = R
@@ -116,7 +96,7 @@ def main():
 
     R, G, B = encoder(img)
 
-    imgRec = decoder(R, G, B)
+    imgRec = decoder(R, G, B, img)
 
     YCbCr = np.array([[0.299,0.587,0.114],
              [-0.168736,-0.331264,0.5],
