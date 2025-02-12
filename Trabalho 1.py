@@ -132,6 +132,9 @@ def main():
 
     
     showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
+    showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
+    showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
+    showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
 
     showImg(img_rec, "Imagem Convertida")
     # print("Invertida")
