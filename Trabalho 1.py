@@ -82,6 +82,20 @@ def encoder(img):
 
     return R, G, B
 
+def RGB_to_YCbCr(img, YCbCr):
+    shape = img.shape
+    img = img.reshape(-1, 3).T
+    img = YCbCr @ img + np.array([[0], [128], [128]])
+    img = img.T.reshape(shape)
+    return img
+
+def YCbCr_to_RGB(img, YCbCr_inv):
+    shape = img.shape
+    img = img.reshape(-1, 3).T
+    img = YCbCr_inv @ (img - np.array([[0], [128], [128]]))
+    img = img.T.reshape(shape)
+    return np.round(img).astype(np.uint8)
+
 def main():
     fName = "./imagens/airport.bmp"
     
@@ -96,27 +110,44 @@ def main():
    
     img = plt.imread(fName)
 
-    print(type(img))
-    print(img.shape)
-    print(img[0:8, 0:8, 0])
-    print(img.dtype)
+    # print(type(img))
+    # print(img.shape)
+    # print(img[0:8, 0:8, 0])
+    # print(img.dtype)
 
 
     R, G, B = encoder(img)
 
     imgRec = decoder(R, G, B)
 
+    YCbCr = np.array([[0.299,0.587,0.114],
+             [-0.168736,-0.331264,0.5],
+             [0.5,-0.418688,-0.081312]])
     
+    YCbCr_INV = np.linalg.inv(YCbCr)
 
-    showImg(img, "Imagem Descodificada")
-    showImg(R,"Codificação a Cinzento", cmGray)
-    showImg(R,"Codificação a Vermelho", cmRed)
-    showImg(G,"Codificação a Verde", cmGreen)
-    showImg(B,"Codificação a Azul", cmBlue)
+    print("Função para converter para YCbCr")
+    img_YCbCr = RGB_to_YCbCr(img,YCbCr)
+
+    print("Função para converter para RGB")
+    img_rec = YCbCr_to_RGB(img_YCbCr,YCbCr_INV)
+
     
-    showImg(imgRec,"Imagem após decoder", cmGray)
+    showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
+
+    showImg(img_rec, "Imagem Convertida")
+    # print("Invertida")
+    # print(YCbCr_INV)
+    # showImg(img, "Imagem Descodificada")
+    # showImg(R,"Codificação a Cinzento", cmGray)
+    # showImg(R,"Codificação a Vermelho", cmRed)
+    # showImg(G,"Codificação a Verde", cmGreen)
+    # showImg(B,"Codificação a Azul", cmBlue)
+    
+    # showImg(imgRec,"Imagem após decoder", cmGray)
 
 # PONTO 4 np.repeat 70/
+# PONTO 5 fzr YCbCr matriz e cálculo nos slides para o decoder inverter matriz com np.linalg.inv
 
 if __name__ == "__main__":
     main()
