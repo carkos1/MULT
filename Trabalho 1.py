@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
+import os
 import cv2
 
 def showImg(img, title, cmap = None):
@@ -79,10 +80,13 @@ def YCbCr_to_RGB(img, YCbCr_inv):
 def choose_img(op):
     if op == 1:
         fName = r"./imagens/airport.bmp"
+        os.system('cls' if os.name == 'nt' else 'clear')
     elif op == 2:
         fName = r"./imagens/geometric.bmp"
+        os.system('cls' if os.name == 'nt' else 'clear')
     elif op == 3:
         fName = r"./imagens/nature.bmp"
+        os.system('cls' if os.name == 'nt' else 'clear')
     else:
         fName= "algo correu mal"
     return fName
@@ -119,7 +123,7 @@ def main():
     R, G, B = encoder(img)
 
     img_YCbCr = RGB_to_YCbCr(img,YCbCr)
-    
+
     img_rec = YCbCr_to_RGB(img_YCbCr,YCbCr_INV)
 
     imgRec = decoder(R, G, B, img)
