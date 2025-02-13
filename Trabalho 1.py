@@ -39,12 +39,14 @@ def padding(color):
 
     return color_padded
 
+def removePadding(color, img):
+    x, y, _ = img.shape
+    color = color[:x, :y]
     
 def decoder(R, G, B, img):
-    x, y, _ = img.shape
-    R = R[:x, :y]
-    G = G[:x, :y]
-    B = B[:x, :y]
+    removePadding(R, img)
+    removePadding(G, img)
+    removePadding(B, img)
     nl, nc = R.shape
     imgRec = np.zeros((nl,nc,3), dtype = np.uint8)
     imgRec[:,:,0] = R
