@@ -76,12 +76,28 @@ def YCbCr_to_RGB(img, YCbCr_inv):
     new_img = new_img @ YCbCr_inv.T 
     return np.round(new_img).astype(np.uint8)
 
-# def downsappling(img):
-#     cv2.resize(img)
-#     return Y_d,Cb_d,Cr_d
+def choose_img(op):
+    if op == 1:
+        fName = r"./imagens/airport.bmp"
+    elif op == 2:
+        fName = r"./imagens/geometric.bmp"
+    elif op == 3:
+        fName = r"./imagens/nature.bmp"
+    else:
+        fName= "algo correu mal"
+    return fName
 
 def main():
+    
+    img_opt = 0
     fName = "./imagens/airport.bmp"
+    
+
+    while(img_opt != 1 and img_opt != 2 and img_opt != 3):
+        print("1- airport.bmp\n2- geometric.bmp\n3- nature.bmp")
+        img_opt = int(input("Opt: "));
+        fName =  choose_img(img_opt)
+
     
     cmRed = clr.LinearSegmentedColormap.from_list("Red", [(0,0,0), (1,0,0)], N=256)
     
@@ -91,25 +107,32 @@ def main():
 
     cmGray = clr.LinearSegmentedColormap.from_list("Gray", [(0,0,0), (1,1,1)], N=256)
 
+   
+    img = plt.imread(fName)
+
+    # print(type(img))
+    # print(img.shape)
+    # print(img[0:8, 0:8, 0])
+    # print(img.dtype)
+
+
+    R, G, B = encoder(img)
+
+    imgRec = decoder(R, G, B, img)
+
     YCbCr = np.array([[0.299,0.587,0.114],
              [-0.168736,-0.331264,0.5],
              [0.5,-0.418688,-0.081312]])
     
     YCbCr_INV = np.linalg.inv(YCbCr)
-   
-    img = plt.imread(fName)
 
-    R, G, B = encoder(img)
-
-    print("Função para converter para YCbCr")
+    #print("Função para converter para YCbCr")
     img_YCbCr = RGB_to_YCbCr(img,YCbCr)
 
-    print("Função para converter para RGB")
+    #print("Função para converter para RGB")
     img_rec = YCbCr_to_RGB(img_YCbCr,YCbCr_INV)
 
-    imgRec = decoder(R, G, B, img)
-
-    print("1-R, G, B\n2-YCbCr\n3-Y, Cb, Cr\n4-Convertida\n0-Sair\n")
+    print("\n1-R, G, B\n2-YCbCr\n3-Y, Cb, Cr\n4-Convertida\n0-Sair\n")
     opt = int(input("Opt: "));
 
     while(opt != 0):
@@ -126,7 +149,16 @@ def main():
         elif opt == 4:
             showImg(img_rec, "Imagem Convertida")
         
+        print("\n1-R, G, B\n2-YCbCr\n3-Y, Cb, Cr\n4-Convertida\n0-Sair\n")
         opt = int(input("Opt: "));
     
+    # print("Invertida")
+    # print(YCbCr_INV)
+    
+    # showImg(imgRec,"Imagem após decoder", cmGray)
+
+# PONTO 4 np.repeat 70/
+# PONTO 5 fzr YCbCr matriz e cálculo nos slides para o decoder inverter matriz com np.linalg.inv
+
 if __name__ == "__main__":
     main()
