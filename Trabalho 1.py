@@ -4,7 +4,7 @@ import matplotlib.colors as clr
 #import os
 import cv2
 
-down = 2                             #Change for downsampling:            1-> 4:2:2      2->4:2:0
+
 
 def showImg(img, title, cmap = None):
     plt.figure()
@@ -49,22 +49,27 @@ def RGB_to_YCbCr(img, YCbCr):
     new_img[:, :, 1:] += 128
     return new_img
 
-def downsappling(img_YCbCr): #no cv2.resize() linear mas se testarmos ganhamos um bónus
+def downsappling(img_YCbCr): 
+
+    down = 1               #Change for downsampling:     1-> 4:2:2      2->4:2:0
+
     new_img = img_YCbCr.copy()
 
     #4:2:2
     Y_d = new_img[:,:,0]      
     xsize = int((Y_d.shape[1]) /2)
     ysize = int(Y_d.shape[0] / down)
+
+    #Estou a usar os 3 tipos de interpolação para testes e para meter informação no relatório, no trabalho final é só para deixar a linear
                              
-    Cb_d_l= cv2.resize(np.round(new_img[:, :, 1]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
-    Cr_d_l= cv2.resize(np.round(new_img[:, :, 2]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_LINEAR)
+    Cb_d_l= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
+    Cr_d_l= cv2.resize(new_img[:, :, 2], (xsize, ysize), interpolation = cv2.INTER_LINEAR)
     
-    Cb_d_c= cv2.resize(np.round(new_img[:, :, 1]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_CUBIC) 
-    Cr_d_c= cv2.resize(np.round(new_img[:, :, 2]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_CUBIC)
+    Cb_d_c= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_CUBIC) 
+    Cr_d_c= cv2.resize(new_img[:, :, 2].astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_CUBIC)
     
-    Cb_d_a= cv2.resize(np.round(new_img[:, :, 1]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_AREA) 
-    Cr_d_a= cv2.resize(np.round(new_img[:, :, 2]).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_AREA)
+    Cb_d_a= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_AREA) 
+    Cr_d_a= cv2.resize(new_img[:, :, 2], (xsize, ysize), interpolation = cv2.INTER_AREA)
     
     return Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a
 
@@ -94,14 +99,15 @@ def YCbCr_to_RGB(img, YCbCr_inv):
     return np.round(new_img).astype(np.uint8)
 
 def upsampling(Y_d, Cb_d, Cr_d):   
-#Para simplificar só vou dar upsampling das cenas em que usei interpolação linear
-     Y_r = Y_d
+    #Para simplificar só vou dar upsampling das cenas em que usei interpolação linear
+
+     Y_r = Y_d  
     
      xsize = int(Y_d.shape[1])
      ysize = int(Y_d.shape[0])
     
-     Cb_rebuilt= cv2.resize(np.round(Cb_d).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
-     Cr_rebuilt= cv2.resize(np.round(Cb_d).astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_LINEAR)
+     Cb_rebuilt= cv2.resize(Cb_d, (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
+     Cr_rebuilt= cv2.resize(Cr_d, (xsize, ysize), interpolation = cv2.INTER_LINEAR)
      
      return Y_r, Cb_rebuilt, Cr_rebuilt
     
