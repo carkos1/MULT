@@ -93,8 +93,18 @@ def DCT_Blocks(img, block_size):
             dct[i:i+block_size, j:j+block_size] = dct_block
 
     return dct
+    
+def sf(dct,q):
+    h, w = dct.shape
+    sf = np.zeros((h,w))
 
-def encoder(img, YCbCr, cmGray, down):
+    for i in range(0, h, 8):
+        for j in range(0, w, 8):
+            block_sf = np.round(dct[i:i+8,j:j+8]/q[tem de ser de 0 a 7])
+            sf[i:i+8,j:j+8] = block_sf
+    return sf
+
+def encoder(img, YCbCr, cmGray, down,Q_Y,Q_CbCr):
     R = img[:,:,0]
     R = padding(R)
     G = img[:,:,1]
@@ -120,10 +130,16 @@ def encoder(img, YCbCr, cmGray, down):
     Y_dct64 = DCT_Blocks(Y_d, 64)
     Cb_dct64 = DCT_Blocks(Cb_d_l, 64)
     Cr_dct64 = DCT_Blocks(Cr_d_l, 64)
-    
+
+    Yb_Q = sf(Y_dct8,Q_Y)
+
+    Cbb_Q = sf(Cb_dct8,Q_CbCr)
+
+    Crb_Q = sf(Cr_dct8,Q_CbCr)
+
     Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d_l, Cr_d_l)
     
-    return R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64
+    return R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64, Yb_Q, Cbb_Q, Crb_Q
 
 
 def removePadding(color, img):
@@ -161,7 +177,6 @@ def DCT_inv(Y_d, Cb_d_l, Cr_d_l):
     Cr_d_l = scipy.fft.idct(Cr_d_l,norm = "ortho").T
 
     return Y_d, Cb_d_l, Cr_d_l
-    
     
 def decoder(R, G, B, img, img_YCbCr,YCbCr_INV, Y_d, Cb_d, Cr_d, Y_dct, Cb_dct, Cr_dct ,cmGray):
     
@@ -229,11 +244,29 @@ def main():
              [-0.168736,-0.331264,0.5],
              [0.5,-0.418688,-0.081312]])
     
+    Q_Y = np.array([[16,11,10,16,24,40,51,61],
+                    [12,12,14,19,26,58,60,55],
+                    [14,13,16,24,40,57,69,56],
+                    [14,17,22,29,51,87,80,62],
+                    [18,22,37,56,68,109,103,77],
+                    [24,35,55,64,81,104,113,92],
+                    [49,64,78,87,103,121,120,101],
+                    [72,92,95,98,112,100,103,99]])
+
+    Q_CbCr = np.array([[17,18,24,47,99,99,99,99],
+                       [18,21,26,66,99,99,99,99],
+                       [24,26,56,99,99,99,99,99],
+                       [47,66,99,99,99,99,99,99],
+                       [99,99,99,99,99,99,99,99],
+                       [99,99,99,99,99,99,99,99],
+                       [99,99,99,99,99,99,99,99],
+                       [99,99,99,99,99,99,99,99]])
+
     YCbCr_INV = np.linalg.inv(YCbCr)
    
     img = plt.imread(fName)
 
-    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64 = encoder(img, YCbCr, cmGray, down)
+    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64, Yb_Q, Cbb_Q, Crb_Q  = encoder(img, YCbCr, cmGray, down, Q_Y, Q_CbCr)
 
     imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_ebuilt  = decoder(R, G, B, img, img_YCbCr, YCbCr_INV, Y_d, Cb_d_l, Cr_d_l, Y_dct, Cb_dct, Cr_dct, cmGray)
 
@@ -333,9 +366,27 @@ def main():
             plt.title("cr_DCT 64x64")
             plt.show()
         elif opt == 10:
+            plt.figure()
+            plt.imshow(Yb_Q,cmGray)
+            plt.axis('off')
+            plt.title("Yb_Q")
+            plt.show()
+            
+            plt.figure()
+            plt.imshow(Cbb_Q, cmGray)
+            plt.axis('off')
+            plt.title("Cbb_Q")
+            plt.show()
+
+            plt.figure()
+            plt.imshow(Crb_Q, cmGray)
+            plt.axis('off')
+            plt.title("Crb_Q")
+            plt.show()
+        elif opt == 11:
             showImg(imgRec, "Imagem Reconstruída")
          
-        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Imagem Convertida\n0- Sair\n")            
+        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10-Dct_Q\n11-Imagem Convertida\n0- Sair\n")            
         opt = int(input("Opt: "));
     
 if __name__ == "__main__":
