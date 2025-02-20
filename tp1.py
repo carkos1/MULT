@@ -5,7 +5,6 @@ import scipy
 import cv2
 
 
-
 def showImg(img, title, cmap = None):
     plt.figure()
     plt.imshow(img, cmap)
@@ -49,13 +48,10 @@ def RGB_to_YCbCr(img, YCbCr):
     new_img[:, :, 1:] += 128
     return new_img
 
-def downsappling(img_YCbCr): 
-
-    down = 1              #Change for downsampling:     1-> 4:2:2      2->4:2:0
+def downsappling(img_YCbCr, down): 
 
     new_img = img_YCbCr.copy()
 
-    #4:2:2
     Y_d = new_img[:,:,0]      
     xsize = int((Y_d.shape[1]) /2)
     ysize = int(Y_d.shape[0] / down)
@@ -98,7 +94,7 @@ def DCT_Blocks(img, block_size):
 
     return dct
 
-def encoder(img, YCbCr, cmGray):
+def encoder(img, YCbCr, cmGray, down):
     R = img[:,:,0]
     R = padding(R)
     G = img[:,:,1]
@@ -115,8 +111,8 @@ def encoder(img, YCbCr, cmGray):
     
     img_YCbCr = RGB_to_YCbCr(img_YCbCr,YCbCr)
     
-    Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a = downsappling(img_YCbCr)
-
+    Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a = downsappling(img_YCbCr, down)
+    
     Y_dct8 = DCT_Blocks(Y_d, 8)
     Cb_dct8 = DCT_Blocks(Cb_d_l, 8)
     Cr_dct8 = DCT_Blocks(Cr_d_l, 8)
@@ -210,11 +206,16 @@ def main():
 
     img_opt = 0
     
+    down = 0
     
     while(img_opt != 1 and img_opt != 2 and img_opt != 3):
         print("\nOpções de Imagem:\n1- airport.bmp\n2- geometric.bmp\n3- nature.bmp")
         img_opt = int(input("Opt: "));
         fName =  choose_img(img_opt)
+        
+    while(down != 1 and down != 2):
+         print("\nOpções de Downsampling:\n1- 4:2:1\n2- 4:2:0")
+         down = int(input("Opt: "));
     
     cmRed = clr.LinearSegmentedColormap.from_list("Red", [(0,0,0), (1,0,0)], N=256)
     
@@ -232,7 +233,7 @@ def main():
    
     img = plt.imread(fName)
 
-    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64 = encoder(img, YCbCr, cmGray)
+    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64 = encoder(img, YCbCr, cmGray, down)
 
     imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_ebuilt  = decoder(R, G, B, img, img_YCbCr, YCbCr_INV, Y_d, Cb_d_l, Cr_d_l, Y_dct, Cb_dct, Cr_dct, cmGray)
 
