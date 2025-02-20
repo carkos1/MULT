@@ -112,7 +112,7 @@ def qauntize_block(block, q):
             quantized = np.round(block[i,j] / q[i,j])
             block_sf[i,j] = quantized
             
-    return block_sf.astype(int)
+    return block_sf
             
     
 def sf(dct,q, quality):
