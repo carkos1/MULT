@@ -93,18 +93,50 @@ def DCT_Blocks(img, block_size):
             dct[i:i+block_size, j:j+block_size] = dct_block
 
     return dct
+
+def quality_coeficient(quality):
+    if quality < 50:
+        return 5000/quality
+    elif quality < 100:
+        return (200-2*quality)
+    else:
+        return 1
+
+
+def qauntize_block(block, q):
     
-def sf(dct,q):
-    h, w = dct.shape
-    sf = np.zeros((h,w))
+    block_sf = np.zeros((8,8))
+    
+    for i in range(0, 8):
+        for j in range(0, 8):
+            quantized = np.round(block[i,j] / q[i,j])
+            block_sf[i,j] = quantized
+            
+    return block_sf.astype(int)
+            
+    
+def sf(dct,q, quality):
+   h, w = dct.shape
+   sf = np.zeros((h,w))
+   
+   S = quality_coeficient(quality)
+   
+   q = ((S * q + 50)/100)
+   
+   for i in range(0, h, 8):
+       for j in range(0, w, 8):
+           block = dct[i:i+8, j:j+8]
+           
+           
+           block_sf = qauntize_block(block, q)
+           
+           
+           sf[i:i+8,j:j+8] = block_sf
+           
+   return sf
 
-    for i in range(0, h, 8):
-        for j in range(0, w, 8):
-            block_sf = np.round(dct[i:i+8,j:j+8]/q[tem de ser de 0 a 7])
-            sf[i:i+8,j:j+8] = block_sf
-    return sf
 
-def encoder(img, YCbCr, cmGray, down,Q_Y,Q_CbCr):
+def encoder(img, YCbCr, cmGray, down,Q_Y,Q_CbCr, quality):
     R = img[:,:,0]
     R = padding(R)
     G = img[:,:,1]
@@ -131,11 +163,11 @@ def encoder(img, YCbCr, cmGray, down,Q_Y,Q_CbCr):
     Cb_dct64 = DCT_Blocks(Cb_d_l, 64)
     Cr_dct64 = DCT_Blocks(Cr_d_l, 64)
 
-    Yb_Q = sf(Y_dct8,Q_Y)
+    Yb_Q = sf(Y_dct8,Q_Y, quality)
 
-    Cbb_Q = sf(Cb_dct8,Q_CbCr)
+    Cbb_Q = sf(Cb_dct8,Q_CbCr, quality)
 
-    Crb_Q = sf(Cr_dct8,Q_CbCr)
+    Crb_Q = sf(Cr_dct8,Q_CbCr, quality)
 
     Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d_l, Cr_d_l)
     
@@ -231,6 +263,8 @@ def main():
     while(down != 1 and down != 2):
          print("\nOpções de Downsampling:\n1- 4:2:1\n2- 4:2:0")
          down = int(input("Opt: "));
+         
+    quality = int(input("Digite a fator de qualidade da matriz de quantizição\n"))
     
     cmRed = clr.LinearSegmentedColormap.from_list("Red", [(0,0,0), (1,0,0)], N=256)
     
@@ -245,13 +279,13 @@ def main():
              [0.5,-0.418688,-0.081312]])
     
     Q_Y = np.array([[16,11,10,16,24,40,51,61],
-                    [12,12,14,19,26,58,60,55],
-                    [14,13,16,24,40,57,69,56],
-                    [14,17,22,29,51,87,80,62],
-                    [18,22,37,56,68,109,103,77],
-                    [24,35,55,64,81,104,113,92],
-                    [49,64,78,87,103,121,120,101],
-                    [72,92,95,98,112,100,103,99]])
+                [12,12,14,19,26,58,60,55],
+                [14,13,16,24,40,57,69,56],
+                [14,17,22,29,51,87,80,62],
+                [18,22,37,56,68,109,103,77],
+                [24,35,55,64,81,104,113,92],
+                [49,64,78,87,103,121,120,101],
+                [72,92,95,98,112,100,103,99]])
 
     Q_CbCr = np.array([[17,18,24,47,99,99,99,99],
                        [18,21,26,66,99,99,99,99],
@@ -266,11 +300,11 @@ def main():
    
     img = plt.imread(fName)
 
-    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64, Yb_Q, Cbb_Q, Crb_Q  = encoder(img, YCbCr, cmGray, down, Q_Y, Q_CbCr)
+    R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64, Yb_Q, Cbb_Q, Crb_Q  = encoder(img, YCbCr, cmGray, down, Q_Y, Q_CbCr, quality)
 
     imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_ebuilt  = decoder(R, G, B, img, img_YCbCr, YCbCr_INV, Y_d, Cb_d_l, Cr_d_l, Y_dct, Cb_dct, Cr_dct, cmGray)
 
-    print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Imagem Convertida\n0- Sair\n")
+    print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Imagem Convertida\n0- Sair\n")
     opt = int(input("Opt: "));
 
     while(opt != 0):
@@ -386,7 +420,7 @@ def main():
         elif opt == 11:
             showImg(imgRec, "Imagem Reconstruída")
          
-        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10-Dct_Q\n11-Imagem Convertida\n0- Sair\n")            
+        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Imagem Convertida\n0- Sair\n")            
         opt = int(input("Opt: "));
     
 if __name__ == "__main__":
