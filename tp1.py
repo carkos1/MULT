@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
@@ -130,13 +131,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down,Q_Y,Q_CbCr, quality
     G = padding(G)
     B = img[:,:,2]
     B = padding(B)
-    
-    showImg(R,"Codificação a Vermelho", cmRed)
-    showImg(G,"Codificação a Verde", cmGreen)
-    showImg(B,"Codificação a Azul", cmBlue)
-    
-    
-    
+
     nl, nc = R.shape
     img_YCbCr = np.zeros((nl,nc,3), dtype = np.uint8)
     
@@ -146,115 +141,23 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down,Q_Y,Q_CbCr, quality
     
     img_YCbCr = RGB_to_YCbCr(img_YCbCr,YCbCr)
     
-    showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
-    
-    showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
-    showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
-    showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
-    
-    
-    
     Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a = downsappling(img_YCbCr, down)
-    
-    showImg((Y_d), "Y_d", cmGray)
-    showImg(Cb_d_l, "Cb_d: Downsampling Linear", cmGray)
-    showImg(Cr_d_l, "Cr_d: Downsampling Linear", cmGray)
-    
-    
-    
+
     Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d_l, Cr_d_l)
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT")
-    plt.show()
-    
-    
     
     Y_dct8 = DCT_Blocks(Y_d, 8)
     Cb_dct8 = DCT_Blocks(Cb_d_l, 8)
     Cr_dct8 = DCT_Blocks(Cr_d_l, 8)
     
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT 8x8")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT 8x8")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT 8x8")
-    plt.show()
-    
-    
-
     Y_dct64 = DCT_Blocks(Y_d, 64)
     Cb_dct64 = DCT_Blocks(Cb_d_l, 64)
     Cr_dct64 = DCT_Blocks(Cr_d_l, 64)
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT 64x64")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT 64x64")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT 64x64")
-    plt.show()
-    
-    
 
     Yb_Q = quantization(Y_dct8,Q_Y, quality)
 
     Cbb_Q = quantization(Cb_dct8,Q_CbCr, quality)
 
     Crb_Q = quantization(Cr_dct8,Q_CbCr, quality)
-    
-    plt.figure()
-    plt.imshow(np.log(np.abs(Yb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Yb_Q")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(np.abs(Cbb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Cbb_Q")
-    plt.show()
-
-    plt.figure()
-    plt.imshow(np.log(np.abs(Crb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Crb_Q")
-    plt.show()
     
     return R, G, B, img_YCbCr, Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a, Y_dct, Cb_dct, Cr_dct, Y_dct8, Cb_dct8, Cr_dct8, Y_dct64, Cb_dct64, Cr_dct64, Yb_Q, Cbb_Q, Crb_Q
 
@@ -331,54 +234,18 @@ def decoder(R, G, B, img, img_YCbCr,YCbCr_INV, Y_dct, Cb_dct, Cr_dct ,Yb_q, Cbb_
     Y_dct = reverse_quantization(Yb_q, Q_Y, quality)
     Cb_dct = reverse_quantization(Cbb_q, Q_CbCr, quality)
     Cr_dct = reverse_quantization(Crb_q, Q_CbCr, quality)
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT 8x8 reconstruído")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT 8x8 reconstruído")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT 8x8 reconstruído")
-    plt.show()
-    
-    
-    
+     
     Y_d = DCT_Blocks_inv(Y_dct, 8)
     Cb_d = DCT_Blocks_inv(Cb_dct, 8)
     Cr_d = DCT_Blocks_inv(Cr_dct, 8)
-    
-    showImg((Y_d), "Y_d reconstruído", cmGray)
-    showImg(Cb_d, "Cb_d: Downsampling Linear recontruído", cmGray)
-    showImg(Cr_d, "Cr_d: Downsampling Linear reconstruído", cmGray)
-    
-  
+     
     Y_r, Cb_rebuilt, Cr_rebuilt = upsampling(Y_d, Cb_d, Cr_d)
-    
-    showImg(Y_r, "Y Upsampling", cmGray)
-    showImg(Cb_rebuilt, "Cb Upsampling", cmGray)
-    showImg(Cr_rebuilt, "Cr Upsampling", cmGray)
-    
+
     YCbCr_rebuilt = img_YCbCr.copy()
     
     YCbCr_rebuilt[:,:,0] = Y_r
     YCbCr_rebuilt[:,:,1] = Cb_rebuilt
     YCbCr_rebuilt[:,:,2] = Cr_rebuilt
-    
-    showImg(np.round(YCbCr_rebuilt[:,:,0]).astype(np.uint8), "Y recontruído", cmGray)
-    showImg(np.round(YCbCr_rebuilt[:,:,1]).astype(np.uint8), "Cb reconstruído", cmGray)
-    showImg(np.round(YCbCr_rebuilt[:,:,2]).astype(np.uint8), "Cr reconstruído", cmGray)
-    
-    showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr reconstruída")
-    
     
     YCbCr_rebuilt = YCbCr_to_RGB(YCbCr_rebuilt ,YCbCr_INV)
     
@@ -391,12 +258,6 @@ def decoder(R, G, B, img, img_YCbCr,YCbCr_INV, Y_dct, Cb_dct, Cr_dct ,Yb_q, Cbb_
     imgRec[:,:,0] = R
     imgRec[:,:,1] = G
     imgRec[:,:,2] = B
-    
-    showImg(R,"Codificação a Vermelho reconstruída", cmRed)
-    showImg(G,"Codificação a Verde reconstruída", cmGreen)
-    showImg(B,"Codificação a Azul reconstruída", cmBlue)
-    
-    showImg(imgRec, "Imagem Reconstruída")
     
     return imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_rebuilt
 
@@ -469,7 +330,7 @@ def main():
     imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_ebuilt  =  decoder(R, G, B, img, img_YCbCr, YCbCr_INV, Y_d, Cb_d_l, Cr_d_l, Yb_Q, Cbb_Q, Crb_Q, Q_Y, Q_CbCr, quality, cmGray, cmRed, cmGreen, cmBlue)
 
     
-    """
+    
     print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Imagem Convertida\n0- Sair\n")
     opt = int(input("Opt: "));
 
@@ -512,84 +373,27 @@ def main():
             showImg(Cb_rebuilt, "Cb reconstruído", cmGray)
             showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr reconstruído", cmGray)
         elif opt == 7:
-            plt.figure()
-            plt.imshow(np.log(abs(Y_dct)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("Y_DCT")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cb_dct)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cb_DCT")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cr_dct)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cr_DCT")
-            plt.show()
+            showImg(np.log(abs(Y_dct)+0.0001), "Y_DCT", cmGray)
+            showImg(np.log(abs(Cb_dct)+0.0001), "Cb_DCT", cmGray)
+            showImg(np.log(abs(Cr_dct)+0.0001), "Cr_DCT", cmGray)
         elif opt == 8:
-            plt.figure()
-            plt.imshow(np.log(abs(Y_dct8)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("Y_DCT 8x8")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cb_dct8)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cb_DCT 8x8")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cr_dct8)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cr_DCT 8x8")
-            plt.show()
+            showImg(np.log(abs(Y_dct8)+0.0001), "Y_DCT 8x8", cmGray)
+            showImg(np.log(abs(Cb_dct8)+0.0001), "Cb_DCT 8x8", cmGray)
+            showImg(np.log(abs(Cr_dct)+0.0001), "Cr_DCT 8x8", cmGray)
         elif opt == 9:
-            plt.figure()
-            plt.imshow(np.log(abs(Y_dct64)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("Y_DCT 64x64")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cb_dct64)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cb_DCT 64x64")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(abs(Cr_dct64)+0.0001), cmGray)
-            plt.axis('off')
-            plt.title("cr_DCT 64x64")
-            plt.show()
+            showImg(np.log(abs(Y_dct64)+0.0001), "Y_DCT 64x64", cmGray)
+            showImg(np.log(abs(Cb_dct64)+0.0001), "Cb_DCT 64x64", cmGray)
+            showImg(np.log(abs(Cr_dct64)+0.0001), "Cr_DCT 64x64", cmGray)
         elif opt == 10:
-            plt.figure()
-            plt.imshow(np.log(np.abs(Yb_Q) + 0.0001),cmGray)
-            plt.axis('off')
-            plt.title("Yb_Q")
-            plt.show()
-            
-            plt.figure()
-            plt.imshow(np.log(np.abs(Cbb_Q) + 0.0001),cmGray)
-            plt.axis('off')
-            plt.title("Cbb_Q")
-            plt.show()
-
-            plt.figure()
-            plt.imshow(np.log(np.abs(Crb_Q) + 0.0001),cmGray)
-            plt.axis('off')
-            plt.title("Crb_Q")
-            plt.show()
+            showImg(np.log(abs(Yb_Q)+0.0001), "Yb_Q", cmGray)
+            showImg(np.log(abs(Cbb_Q)+0.0001), "Cbb_Q", cmGray)
+            showImg(np.log(abs(Crb_Q)+0.0001), "Crb_Q", cmGray)
         elif opt == 11:
             showImg(imgRec, "Imagem Reconstruída")
          
         print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Imagem Convertida\n0- Sair\n")            
         opt = int(input("Opt: "));
         
-        """
     
 if __name__ == "__main__":
     main()
