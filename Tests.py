@@ -49,26 +49,19 @@ def RGB_to_YCbCr(img, YCbCr):
     new_img[:, :, 1:] += 128
     return new_img
 
-def downsappling(img_YCbCr, down): 
+
+def downsappling(img_YCbCr, down, interpol): 
 
     new_img = img_YCbCr.copy()
 
     Y_d = new_img[:,:,0]      
     xsize = int((Y_d.shape[1]) /2)
     ysize = int(Y_d.shape[0] / down)
-
-    #Estou a usar os 3 tipos de interpolação para testes e para meter informação no relatório, no trabalho final é só para deixar a linear
                              
-    Cb_d_l= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
-    Cr_d_l= cv2.resize(new_img[:, :, 2], (xsize, ysize), interpolation = cv2.INTER_LINEAR)
+    Cb_d= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation =  interpol) 
+    Cr_d= cv2.resize(new_img[:, :, 2], (xsize, ysize), interpolation = interpol)
     
-    Cb_d_c= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_CUBIC) 
-    Cr_d_c= cv2.resize(new_img[:, :, 2].astype(np.uint8), (xsize, ysize), interpolation = cv2.INTER_CUBIC)
-    
-    Cb_d_a= cv2.resize(new_img[:, :, 1], (xsize, ysize), interpolation = cv2.INTER_AREA) 
-    Cr_d_a= cv2.resize(new_img[:, :, 2], (xsize, ysize), interpolation = cv2.INTER_AREA)
-    
-    return Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a
+    return Y_d, Cb_d, Cr_d
 
 def DCT(Y_d, Cb_d_l, Cr_d_l):
     Y_d = scipy.fft.dct(Y_d,norm = "ortho").T
@@ -115,6 +108,8 @@ def quantization(dct,q, quality):
        return dct
    
    q_s = np.clip(np.round(q * S), 1, 255)
+   
+   print("Q_Y\n", q_s, "\n")
 
    
    for i in range(0, h, 8):
@@ -142,7 +137,7 @@ def DPCM(dc):
     return diff
 
 
-def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quality):
+def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_CbCr, quality):
     
     
     R = img[:,:,0]
@@ -156,9 +151,10 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     B = padding(B)
     
     showImg(R,"Codificação a Vermelho", cmRed)
-    print("R[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     showImg(G,"Codificação a Verde", cmGreen)
     showImg(B,"Codificação a Azul", cmBlue)
+    
+    print("R[8:16, 8:16]\n", R[8:16, 8:16], "\n\n")
     
     
     
@@ -174,53 +170,49 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
     
     showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
-    print("img_YCbCr[8:16, 8:16, 0]\n", img_YCbCr[8:16, 8:16, 0], "\n")
     showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
-    print("img_YCbCr[8:16, 8:16, 1]\n", img_YCbCr[8:16, 8:16, 1], "\n")
     showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
     
-    
-    
-    Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a = downsappling(img_YCbCr, down)
-    
-    showImg((Y_d), "Y_d", cmGray)
-    showImg(Cb_d_l, "Cb_d: Downsampling Linear", cmGray)
-    print("Cb_d_l[8:16, 8:16]\n", Cb_d_l[8:16, 8:16], "\n")
-    showImg(Cr_d_l, "Cr_d: Downsampling Linear", cmGray)
-    
-    showImg((Y_d), "Y_d", cmGray)
-    showImg(Cb_d_c, "Cb_d: Downsampling Cúbico", cmGray)
-    showImg(Cr_d_c, "Cr_d: Downsampling Cúbico", cmGray)
-    
-    showImg((Y_d), "Y_d", cmGray)
-    showImg(Cb_d_a, "Cb_d: Downsampling de Área", cmGray)
-    showImg(Cr_d_a, "Cr_d: Downsampling de Área", cmGray)
+    print("img_YCbCr[8:16, 8:16, 0]\n", img_YCbCr[8:16, 8:16, 0], "\n")
+    print("img_YCbCr[8:16, 8:16, 1]\n", img_YCbCr[8:16, 8:16, 1], "\n")
     
     
     
-    Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d_l, Cr_d_l)
+    Y_d, Cb_d, Cr_d = downsappling(img_YCbCr, down, interpol)
+    
+    showImg((Y_d), "Y_d: Downsampling", cmGray)
+    showImg(Cb_d, "Cb_d: Downsampling", cmGray)
+    showImg(Cr_d, "Cr_d: Downsampling", cmGray)
+    
+    print("Cb_d[8:16, 8:16]\n", Cb_d[8:16, 8:16], "\n")
+    
+    
+    
+    
+    Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d, Cr_d)
     
     showImg(np.log(np.abs(Y_dct) + 0.0001), "Y_DCT", cmGray)
     showImg(np.log(np.abs(Cb_dct) + 0.0001), "Cb_DCT", cmGray)
     showImg((np.log(np.abs(Cr_dct) + 0.0001)), "Cr_DCT", cmGray)
     
-    
     Y_dct8 = DCT_Blocks(Y_d, 8)
-    Cb_dct8 = DCT_Blocks(Cb_d_l, 8)
-    Cr_dct8 = DCT_Blocks(Cr_d_l, 8)
+    Cb_dct8 = DCT_Blocks(Cb_d, 8)
+    Cr_dct8 = DCT_Blocks(Cr_d, 8)
     
     showImg(np.log(np.abs(Y_dct8) + 0.0001), "Y_DCT 8x8", cmGray)
-    print("Y_dct8[8:16, 8:16]\n", Y_dct8[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cb_dct8) + 0.0001), "Cb_DCT 8x8", cmGray)
     showImg((np.log(np.abs(Cr_dct8) + 0.0001)), "Cr_DCT 8x8", cmGray)
+    
+    print("Y_dct8[8:16, 8:16]\n", Y_dct8[8:16, 8:16], "\n")
 
     Y_dct64 = DCT_Blocks(Y_d, 64)
-    Cb_dct64 = DCT_Blocks(Cb_d_l, 64)
-    Cr_dct64 = DCT_Blocks(Cr_d_l, 64)
+    Cb_dct64 = DCT_Blocks(Cb_d, 64)
+    Cr_dct64 = DCT_Blocks(Cr_d, 64)
     
     showImg(np.log(np.abs(Y_dct64) + 0.0001), "Y_DCT 64x64", cmGray)
     showImg(np.log(np.abs(Cb_dct64) + 0.0001), "Cb_DCT 64x64", cmGray)
     showImg((np.log(np.abs(Cr_dct64) + 0.0001)), "Cr_DCT 64x64", cmGray)
+    
     
     
     Yb_Q = quantization(Y_dct8,Q_Y, quality)
@@ -230,9 +222,11 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     Crb_Q = quantization(Cr_dct8,Q_CbCr, quality)
     
     showImg(np.log(abs(Yb_Q)+0.0001), "Yb_Q", cmGray)
-    print("Yb_Q[8:16, 8:16]\n", Yb_Q[8:16, 8:16], "\n")
     showImg(np.log(abs(Cbb_Q)+0.0001), "Cbb_Q", cmGray)
     showImg(np.log(abs(Crb_Q)+0.0001), "Crb_Q", cmGray)
+    
+    print("Yb_Q[8:16, 8:16]\n", Yb_Q[8:16, 8:16], "\n")
+    
     
    
     Yb_DPCM = DPCM(Yb_Q)
@@ -240,9 +234,10 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     Crb_DPCM = DPCM(Crb_Q)
     
     showImg(np.log(abs(Yb_DPCM)+0.0001), "Yb_DPCM", cmGray)
-    print("Yb_DPCM[8:16, 8:16]\n", Yb_DPCM[8:16, 8:16], "\n")
     showImg(np.log(abs(Cbb_DPCM)+0.0001), "Cbb_DPCM", cmGray)
     showImg(np.log(abs(Crb_DPCM)+0.0001), "Crb_DPCM", cmGray)
+    
+    print("Yb_DPCM[8:16, 8:16]\n", Yb_DPCM[8:16, 8:16], "\n")
     
     
     return Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl_unpadded, nc_unpadded
@@ -259,16 +254,14 @@ def YCbCr_to_RGB(img, YCbCr_inv):
     new_img = new_img @ YCbCr_inv.T
     return np.clip(np.round(new_img), 0, 255).astype(np.uint8)
 
-def upsampling(Y_d, Cb_d, Cr_d):   
-    #Para simplificar só vou dar upsampling das cenas em que usei interpolação linear
-
+def upsampling(Y_d, Cb_d, Cr_d, interpol):   
      Y_r = Y_d  
     
      xsize = int(Y_d.shape[1])
      ysize = int(Y_d.shape[0])
     
-     Cb_rebuilt= cv2.resize(Cb_d, (xsize, ysize), interpolation = cv2.INTER_LINEAR) 
-     Cr_rebuilt= cv2.resize(Cr_d, (xsize, ysize), interpolation = cv2.INTER_LINEAR)
+     Cb_rebuilt= cv2.resize(Cb_d, (xsize, ysize), interpolation = interpol) 
+     Cr_rebuilt= cv2.resize(Cr_d, (xsize, ysize), interpolation = interpol)
      
      return Y_r, Cb_rebuilt, Cr_rebuilt
  
@@ -334,16 +327,17 @@ def reverse_DPCM(diff):
                 
     return dc
 
-def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality, cmGray, cmRed, cmGreen, cmBlue):
+def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality, interpol ,cmGray, cmRed, cmGreen, cmBlue):
     
     Yb_q = reverse_DPCM(Yb_DPCM)
     Cbb_q  = reverse_DPCM(Cbb_DPCM)
     Crb_q  = reverse_DPCM(Crb_DPCM)
     
     showImg(np.log(np.abs(Yb_q) + 0.0001), "Yb_Q reconstruído", cmGray)
-    print("Yb_q reconstruído[8:16, 8:16]\n", Yb_q[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cbb_q) + 0.0001), "Cbb_Q reconstruído", cmGray)
     showImg((np.log(np.abs(Crb_q) + 0.0001)), "Crb_Q reconstruído", cmGray)
+    
+    print("Yb_q reconstruído[8:16, 8:16]\n", Yb_q[8:16, 8:16], "\n")
 
     
       
@@ -352,9 +346,10 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     Cr_dct = reverse_quantization(Crb_q, Q_CbCr, quality)
     
     showImg(np.log(np.abs(Y_dct) + 0.0001), "Y_DCT 8x8 reconstruído", cmGray)
-    print("Y_dct reconstruído[8:16, 8:16]\n", Y_dct[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cb_dct) + 0.0001), "Cb_DCT 8x8 reconstruído", cmGray)
     showImg((np.log(np.abs(Cr_dct) + 0.0001)), "Cr_DCT 8x8 reconstruído", cmGray)
+    
+    print("Y_dct reconstruído[8:16, 8:16]\n", Y_dct[8:16, 8:16], "\n")
     
     
     Y_d = DCT_Blocks_inv(Y_dct, 8)
@@ -362,17 +357,19 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     Cr_d = DCT_Blocks_inv(Cr_dct, 8)
     
     showImg((Y_d), "Y_d reconstruído", cmGray)
-    print("Y_d reconstruído[8:16, 8:16]\n", Y_d[8:16, 8:16], "\n")
     showImg(Cb_d, "Cb_d: Downsampling Linear recontruído", cmGray)
     showImg(Cr_d, "Cr_d: Downsampling Linear reconstruído", cmGray)
     
+    print("Y_d reconstruído[8:16, 8:16]\n", Y_d[8:16, 8:16], "\n")
+    
   
-    Y_r, Cb_rebuilt, Cr_rebuilt = upsampling(Y_d, Cb_d, Cr_d)
+    Y_r, Cb_rebuilt, Cr_rebuilt = upsampling(Y_d, Cb_d, Cr_d, interpol)
     
     showImg(Y_r, "Y Upsampling", cmGray)
     showImg(Cb_rebuilt, "Cb Upsampling", cmGray)
-    print("Cb_rebuilt[8:16, 8:16]\n", Cb_rebuilt[8:16, 8:16], "\n")
     showImg(Cr_rebuilt, "Cr Upsampling", cmGray)
+    
+    print("Cb_rebuilt[8:16, 8:16]\n", Cb_rebuilt[8:16, 8:16], "\n")
     
     nl_padded, nc_padded = Y_r.shape
     
@@ -403,9 +400,10 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     imgRec[:,:,2] = B
     
     showImg(R,"Codificação a Vermelho reconstruída", cmRed)
-    print("R reconstruído[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     showImg(G,"Codificação a Verde reconstruída", cmGreen)
     showImg(B,"Codificação a Azul reconstruída", cmBlue)
+    
+    print("R reconstruído[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     
     return imgRec
 
@@ -428,6 +426,8 @@ def main():
     
     down = 0
     
+    interpol= -1
+    
     while(img_opt != 1 and img_opt != 2 and img_opt != 3):
         print("\nOpções de Imagem:\n1- airport.bmp\n2- geometric.bmp\n3- nature.bmp")
         img_opt = int(input("Opt: "));
@@ -436,6 +436,11 @@ def main():
     while(down != 1 and down != 2):
          print("\nOpções de Downsampling:\n1- 4:2:2\n2- 4:2:0")
          down = int(input("Opt: "));
+         
+    while(interpol <= -1 or interpol > 4):
+         print("\nOpções de Interpolação:\n1- Nearest\n2- Linear\n3- Cúbica\n4- De Àrea")
+         interpol = int(input("Opt: ")) - 1;
+
          
     quality = int(input("Digite a fator de qualidade da matriz de quantização (fator recomendado: 75)\n"))
     
@@ -459,7 +464,7 @@ def main():
                 [24,35,55,64,81,104,113,92],
                 [49,64,78,87,103,121,120,101],
                 [72,92,95,98,112,100,103,99]])
-    print("Q_Y\n", Q_Y, "\n")
+    
 
     Q_CbCr = np.array([[17,18,24,47,99,99,99,99],
                        [18,21,26,66,99,99,99,99],
@@ -475,12 +480,14 @@ def main():
     img = plt.imread(fName)
     
     showImg(img, "Imagem Original")
+    print("Imagem Original[8:16, 8:16]\n", img[8:16, 8:16], "\n")
 
-    Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl, nc  = encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quality)
+    Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl, nc  = encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_CbCr, quality)
 
-    imgRec = decoder(nl, nc, YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM, Q_Y, Q_CbCr, quality, cmGray, cmRed, cmGreen, cmBlue)
+    imgRec = decoder(nl, nc, YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM, Q_Y, Q_CbCr, quality, interpol ,cmGray, cmRed, cmGreen, cmBlue)
 
     showImg(imgRec, "Imagem Reconstruída")
+    print("Imagem Reconstruída[8:16, 8:16]\n", imgRec[8:16, 8:16], "\n")
     
 if __name__ == "__main__":
     main()
