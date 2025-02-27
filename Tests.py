@@ -156,6 +156,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     B = padding(B)
     
     showImg(R,"Codificação a Vermelho", cmRed)
+    print("R[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     showImg(G,"Codificação a Verde", cmGreen)
     showImg(B,"Codificação a Azul", cmBlue)
     
@@ -173,7 +174,9 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     showImg(np.round(img_YCbCr).astype(np.uint8), "Imagem YCbCr")
     
     showImg(np.round(img_YCbCr[:,:,0]).astype(np.uint8), "Y", cmGray)
+    print("img_YCbCr[8:16, 8:16, 0]\n", img_YCbCr[8:16, 8:16, 0], "\n")
     showImg(np.round(img_YCbCr[:,:,1]).astype(np.uint8), "Cb", cmGray)
+    print("img_YCbCr[8:16, 8:16, 1]\n", img_YCbCr[8:16, 8:16, 1], "\n")
     showImg(np.round(img_YCbCr[:,:,2]).astype(np.uint8), "Cr", cmGray)
     
     
@@ -182,6 +185,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     
     showImg((Y_d), "Y_d", cmGray)
     showImg(Cb_d_l, "Cb_d: Downsampling Linear", cmGray)
+    print("Cb_d_l[8:16, 8:16]\n", Cb_d_l[8:16, 8:16], "\n")
     showImg(Cr_d_l, "Cr_d: Downsampling Linear", cmGray)
     
     showImg((Y_d), "Y_d", cmGray)
@@ -206,6 +210,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     Cr_dct8 = DCT_Blocks(Cr_d_l, 8)
     
     showImg(np.log(np.abs(Y_dct8) + 0.0001), "Y_DCT 8x8", cmGray)
+    print("Y_dct8[8:16, 8:16]\n", Y_dct8[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cb_dct8) + 0.0001), "Cb_DCT 8x8", cmGray)
     showImg((np.log(np.abs(Cr_dct8) + 0.0001)), "Cr_DCT 8x8", cmGray)
 
@@ -225,6 +230,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     Crb_Q = quantization(Cr_dct8,Q_CbCr, quality)
     
     showImg(np.log(abs(Yb_Q)+0.0001), "Yb_Q", cmGray)
+    print("Yb_Q[8:16, 8:16]\n", Yb_Q[8:16, 8:16], "\n")
     showImg(np.log(abs(Cbb_Q)+0.0001), "Cbb_Q", cmGray)
     showImg(np.log(abs(Crb_Q)+0.0001), "Crb_Q", cmGray)
     
@@ -234,6 +240,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     Crb_DPCM = DPCM(Crb_Q)
     
     showImg(np.log(abs(Yb_DPCM)+0.0001), "Yb_DPCM", cmGray)
+    print("Yb_DPCM[8:16, 8:16]\n", Yb_DPCM[8:16, 8:16], "\n")
     showImg(np.log(abs(Cbb_DPCM)+0.0001), "Cbb_DPCM", cmGray)
     showImg(np.log(abs(Crb_DPCM)+0.0001), "Crb_DPCM", cmGray)
     
@@ -334,6 +341,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     Crb_q  = reverse_DPCM(Crb_DPCM)
     
     showImg(np.log(np.abs(Yb_q) + 0.0001), "Yb_Q reconstruído", cmGray)
+    print("Yb_q reconstruído[8:16, 8:16]\n", Yb_q[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cbb_q) + 0.0001), "Cbb_Q reconstruído", cmGray)
     showImg((np.log(np.abs(Crb_q) + 0.0001)), "Crb_Q reconstruído", cmGray)
 
@@ -344,6 +352,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     Cr_dct = reverse_quantization(Crb_q, Q_CbCr, quality)
     
     showImg(np.log(np.abs(Y_dct) + 0.0001), "Y_DCT 8x8 reconstruído", cmGray)
+    print("Y_dct reconstruído[8:16, 8:16]\n", Y_dct[8:16, 8:16], "\n")
     showImg(np.log(np.abs(Cb_dct) + 0.0001), "Cb_DCT 8x8 reconstruído", cmGray)
     showImg((np.log(np.abs(Cr_dct) + 0.0001)), "Cr_DCT 8x8 reconstruído", cmGray)
     
@@ -353,6 +362,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     Cr_d = DCT_Blocks_inv(Cr_dct, 8)
     
     showImg((Y_d), "Y_d reconstruído", cmGray)
+    print("Y_d reconstruído[8:16, 8:16]\n", Y_d[8:16, 8:16], "\n")
     showImg(Cb_d, "Cb_d: Downsampling Linear recontruído", cmGray)
     showImg(Cr_d, "Cr_d: Downsampling Linear reconstruído", cmGray)
     
@@ -361,6 +371,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     
     showImg(Y_r, "Y Upsampling", cmGray)
     showImg(Cb_rebuilt, "Cb Upsampling", cmGray)
+    print("Cb_rebuilt[8:16, 8:16]\n", Cb_rebuilt[8:16, 8:16], "\n")
     showImg(Cr_rebuilt, "Cr Upsampling", cmGray)
     
     nl_padded, nc_padded = Y_r.shape
@@ -392,6 +403,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     imgRec[:,:,2] = B
     
     showImg(R,"Codificação a Vermelho reconstruída", cmRed)
+    print("R reconstruído[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     showImg(G,"Codificação a Verde reconstruída", cmGreen)
     showImg(B,"Codificação a Azul reconstruída", cmBlue)
     
@@ -447,6 +459,7 @@ def main():
                 [24,35,55,64,81,104,113,92],
                 [49,64,78,87,103,121,120,101],
                 [72,92,95,98,112,100,103,99]])
+    print("Q_Y\n", Q_Y, "\n")
 
     Q_CbCr = np.array([[17,18,24,47,99,99,99,99],
                        [18,21,26,66,99,99,99,99],
