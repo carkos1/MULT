@@ -196,97 +196,38 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     
     Y_dct, Cb_dct, Cr_dct = DCT(Y_d, Cb_d_l, Cr_d_l)
     
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT")
-    plt.show()
-    
+    showImg(np.log(np.abs(Y_dct) + 0.0001), "Y_DCT", cmGray)
+    showImg(np.log(np.abs(Cb_dct) + 0.0001), "Cb_DCT", cmGray)
+    showImg((np.log(np.abs(Cr_dct) + 0.0001)), "Cr_DCT", cmGray)
     
     
     Y_dct8 = DCT_Blocks(Y_d, 8)
     Cb_dct8 = DCT_Blocks(Cb_d_l, 8)
     Cr_dct8 = DCT_Blocks(Cr_d_l, 8)
     
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT 8x8")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT 8x8")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct8)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT 8x8")
-    plt.show()
-    
-    
+    showImg(np.log(np.abs(Y_dct8) + 0.0001), "Y_DCT 8x8", cmGray)
+    showImg(np.log(np.abs(Cb_dct8) + 0.0001), "Cb_DCT 8x8", cmGray)
+    showImg((np.log(np.abs(Cr_dct8) + 0.0001)), "Cr_DCT 8x8", cmGray)
 
     Y_dct64 = DCT_Blocks(Y_d, 64)
     Cb_dct64 = DCT_Blocks(Cb_d_l, 64)
     Cr_dct64 = DCT_Blocks(Cr_d_l, 64)
     
-    plt.figure()
-    plt.imshow(np.log(abs(Y_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("Y_DCT 64x64")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cb_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cb_DCT 64x64")
-    plt.show()
-    
-    plt.figure()
-    plt.imshow(np.log(abs(Cr_dct64)+0.0001), cmGray)
-    plt.axis('off')
-    plt.title("cr_DCT 64x64")
-    plt.show()
+    showImg(np.log(np.abs(Y_dct64) + 0.0001), "Y_DCT 64x64", cmGray)
+    showImg(np.log(np.abs(Cb_dct64) + 0.0001), "Cb_DCT 64x64", cmGray)
+    showImg((np.log(np.abs(Cr_dct64) + 0.0001)), "Cr_DCT 64x64", cmGray)
     
     
-
     Yb_Q = quantization(Y_dct8,Q_Y, quality)
 
     Cbb_Q = quantization(Cb_dct8,Q_CbCr, quality)
 
     Crb_Q = quantization(Cr_dct8,Q_CbCr, quality)
     
-    plt.figure()
-    plt.imshow(np.log(np.abs(Yb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Yb_Q")
-    plt.show()
+    showImg(np.log(abs(Yb_Q)+0.0001), "Yb_Q", cmGray)
+    showImg(np.log(abs(Cbb_Q)+0.0001), "Cbb_Q", cmGray)
+    showImg(np.log(abs(Crb_Q)+0.0001), "Crb_Q", cmGray)
     
-    plt.figure()
-    plt.imshow(np.log(np.abs(Cbb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Cbb_Q")
-    plt.show()
-
-    plt.figure()
-    plt.imshow(np.log(np.abs(Crb_Q) + 0.0001),cmGray)
-    plt.axis('off')
-    plt.title("Crb_Q")
-    plt.show()
    
     Yb_DPCM = DPCM(Yb_Q)
     Cbb_DPCM = DPCM(Cbb_Q)
