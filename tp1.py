@@ -143,7 +143,7 @@ def DPCM(dc):
 
 def calc_erros(img, imgRec,y_diff):
     m, n, _ = img.shape
-    mse = 1/(m*n)*np.sum((img-imgRec)**2)
+    mse = np.sum(((img.astype(np.float64)-imgRec.astype(np.float64))**2))/(m*n)
     rmse = np.sqrt(mse)
     p = 1/(m*n)*np.sum(img**2)
     snr = 10*np.log(p/mse)
