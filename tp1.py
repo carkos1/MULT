@@ -141,6 +141,17 @@ def DPCM(dc):
                 
     return diff
 
+def calc_erros(img, imgRec,y_diff):
+    m, n, _ = img.shape
+    mse = 1/(m*n)*np.sum((img-imgRec)**2)
+    rmse = np.sqrt(mse)
+    p = 1/(m*n)*np.sum(img**2)
+    snr = 10*np.log(p/mse)
+    psnr = 10*np.log((np.max(img)**2)/mse)
+    max_dif = np.max(y_diff)
+    avg_dif = np.average(y_diff)
+    return mse, rmse, snr, psnr, max_dif, avg_dif
+
 def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quality):
     R = img[:,:,0]
     R = padding(R)
@@ -157,6 +168,8 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, Q_Y, Q_CbCr, quali
     img_YCbCr[:,:,2] = B
     
     img_YCbCr = RGB_to_YCbCr(img_YCbCr,YCbCr)
+
+
     
     Y_d, Cb_d_l, Cr_d_l, Cb_d_c, Cr_d_c, Cb_d_a, Cr_d_a = downsappling(img_YCbCr, down)
 
@@ -351,9 +364,13 @@ def main():
 
     imgRec, YCbCr_rebuilt, Y_r, Cb_rebuilt, Cr_rebuilt  =  decoder(R, G, B, img, img_YCbCr, YCbCr_INV, Y_d, Cb_d_l, Cr_d_l, Yb_Q, Cbb_Q, Crb_Q, Q_Y, Q_CbCr, quality, cmGray, cmRed, cmGreen, cmBlue)
 
+    y_diff = np.abs(Y_d - Y_r)
+
+    mse,rmse,snr,psnr,max_dif, avg_dif = calc_erros(img,imgRec,y_diff)
     
-    
-    print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n0- Sair\n")
+    print(f"mse\n {mse}\nrmse \n {rmse}\nsnr\n{snr}\n psnr\n{psnr}\nmax_dif\n{max_dif}\navg_dif\n{avg_dif}")
+
+    print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n13- Diferenças e Erros\n0- Sair\n")
     opt = int(input("Opt: "));
 
     while(opt != 0):
@@ -416,8 +433,10 @@ def main():
             showImg(np.log(abs(Crb_DPCM)+0.0001), "Crb_DPCM", cmGray)
         elif opt == 12:
             showImg(imgRec, "Imagem Reconstruída")
+        elif opt == 13:
+            showImg(y_diff, "Imagem diferenças", cmGray)
          
-        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n0- Sair\n")            
+        print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n13- Diferenças e Erros\n0- Sair\n")            
         opt = int(input("Opt: "));
         
     
