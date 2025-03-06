@@ -142,12 +142,14 @@ def DPCM(dc):
     return diff
 
 def calc_erros(img, imgRec,y_diff):
+    img = img.astype(np.float64)
+    imgRec = imgRec.astype(np.float64)
     m, n, _ = img.shape
-    mse = np.sum(((img.astype(np.float64)-imgRec.astype(np.float64))**2))/(m*n)
+    mse = np.sum(((img-imgRec)**2))/(m*n)
     rmse = np.sqrt(mse)
-    p = 1/(m*n)*np.sum(img**2)
-    snr = 10*np.log(p/mse)
-    psnr = 10*np.log((np.max(img)**2)/mse)
+    p = np.sum(img**2) / (m*n)
+    snr = 10*np.log10(p/mse)
+    psnr = 10*np.log10((np.max(img)**2)/mse)
     max_dif = np.max(y_diff)
     avg_dif = np.average(y_diff)
     return mse, rmse, snr, psnr, max_dif, avg_dif
@@ -368,7 +370,7 @@ def main():
 
     mse,rmse,snr,psnr,max_dif, avg_dif = calc_erros(img,imgRec,y_diff)
     
-    print(f"mse\n {mse}\nrmse \n {rmse}\nsnr\n{snr}\n psnr\n{psnr}\nmax_dif\n{max_dif}\navg_dif\n{avg_dif}")
+    
 
     print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n13- Diferenças e Erros\n0- Sair\n")
     opt = int(input("Opt: "));
@@ -435,6 +437,7 @@ def main():
             showImg(imgRec, "Imagem Reconstruída")
         elif opt == 13:
             showImg(y_diff, "Imagem diferenças", cmGray)
+            print(f"\nmse\n {mse}\nrmse \n {rmse}\nsnr\n{snr}\npsnr\n{psnr}\nmax_dif\n{max_dif}\navg_dif\n{avg_dif}")
          
         print("\n\nOpções de Operação:\n1- Imagem Original\n2- R, G, B\n3- YCbCr\n4- Y, Cb, Cr\n5- Downsampling\n6- Upsampling\n7- DCT nos canais completos\n8- DCT 8x8\n9- DCT 64x64\n10- Quantização dos coeficientes DCT\n11- Codificação dos coeficientes DC\n12- Imagem Convertida\n13- Diferenças e Erros\n0- Sair\n")            
         opt = int(input("Opt: "));
