@@ -135,7 +135,18 @@ def DPCM(dc):
                 diff[i, j] = dc[i, j]
                 
     return diff
-
+def calc_erros(img, imgRec,y_diff):
+    img = img.astype(np.float64)
+    imgRec = imgRec.astype(np.float64)
+    m, n, _ = img.shape
+    mse = np.sum(((img-imgRec)**2))/(m*n)
+    rmse = np.sqrt(mse)
+    p = np.sum(img**2) / (m*n)
+    snr = 10*np.log10(p/mse)
+    psnr = 10*np.log10((np.max(img)**2)/mse)
+    max_dif = np.max(y_diff)
+    avg_dif = np.average(y_diff)
+    return mse, rmse, snr, psnr, max_dif, avg_dif
 
 def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_CbCr, quality):
     
@@ -240,7 +251,7 @@ def encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_C
     print("Yb_DPCM[8:16, 8:16]\n", Yb_DPCM[8:16, 8:16], "\n")
     
     
-    return Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl_unpadded, nc_unpadded
+    return Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl_unpadded, nc_unpadded, Y_d
 
 
 def removePadding(color, img):
@@ -379,7 +390,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     YCbCr_rebuilt[:,:,1] = Cb_rebuilt
     YCbCr_rebuilt[:,:,2] = Cr_rebuilt
     
-    showImg(np.round(YCbCr_rebuilt[:,:,0]).astype(np.uint8), "Y recontruído", cmGray)
+    showImg(np.round(YCbCr_rebuilt[:,:,0]).astype(np.uint8), "Y reconstruído", cmGray)
     showImg(np.round(YCbCr_rebuilt[:,:,1]).astype(np.uint8), "Cb reconstruído", cmGray)
     showImg(np.round(YCbCr_rebuilt[:,:,2]).astype(np.uint8), "Cr reconstruído", cmGray)
     
@@ -405,7 +416,7 @@ def decoder(nl, nc,YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM , Q_Y, Q_CbCr, quality
     
     print("R reconstruído[8:16, 8:16]\n", R[8:16, 8:16], "\n")
     
-    return imgRec
+    return imgRec, Y_r
 
 
 def choose_img(op):
@@ -482,12 +493,19 @@ def main():
     showImg(img, "Imagem Original")
     print("Imagem Original[8:16, 8:16]\n", img[8:16, 8:16], "\n")
 
-    Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl, nc  = encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_CbCr, quality)
+    Yb_DPCM, Cbb_DPCM, Crb_DPCM, nl, nc, Y_d  = encoder(img, YCbCr, cmRed, cmGreen, cmBlue ,cmGray, down, interpol ,Q_Y, Q_CbCr, quality)
 
-    imgRec = decoder(nl, nc, YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM, Q_Y, Q_CbCr, quality, interpol ,cmGray, cmRed, cmGreen, cmBlue)
+    imgRec, Y_r = decoder(nl, nc, YCbCr_INV, Yb_DPCM, Cbb_DPCM, Crb_DPCM, Q_Y, Q_CbCr, quality, interpol ,cmGray, cmRed, cmGreen, cmBlue)
 
     showImg(imgRec, "Imagem Reconstruída")
     print("Imagem Reconstruída[8:16, 8:16]\n", imgRec[8:16, 8:16], "\n")
+    
+    y_diff = np.abs(Y_d - Y_r)
+    showImg(y_diff, "Imagem diferenças", cmGray)
+    print("Imagem diferenças\n", imgRec, "\n")
+
+    mse,rmse,snr,psnr,max_dif, avg_dif = calc_erros(img,imgRec,y_diff)
+    print(f"\nmse\n {mse}\nrmse \n {rmse}\nsnr\n{snr}\npsnr\n{psnr}\nmax_dif\n{max_dif}\navg_dif\n{avg_dif}")
     
 if __name__ == "__main__":
     main()
