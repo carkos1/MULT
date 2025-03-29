@@ -16,7 +16,7 @@ if __name__ == "__main__":
     plt.close('all')
     
     #--- Load file
-    fName = "../Queries/MT0000414517.mp3"    
+    fName = "Queries/MT0000414517.mp3"    
     sr = 22050
     mono = True
     warnings.filterwarnings("ignore")
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     print(fs)
     
     #--- Play Sound
-    #sd.play(y, sr, blocking=False)
+    sd.play(y, sr, blocking=False)
     
     #--- Plot sound waveform
     plt.figure()
