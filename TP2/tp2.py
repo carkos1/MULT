@@ -10,11 +10,11 @@ import scipy
 import os
 from types import NoneType
 
-musicsfolder = "Music/"
+musicsfolder = "musics/"
 
 def extract_features(folder):
     feature = []
-    y, sr = librosa.load(folder, sr=None)
+    y, sr = librosa.load(folder, sr = 22050)
 
     mfc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
     for line in mfc:
