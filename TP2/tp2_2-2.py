@@ -51,7 +51,7 @@ def scCompare(sc_manual, spec_centr):
     # Flatten librosa spectral centroid to 1D array
     if spec_centr.ndim > 1:
         spec_centr = spec_centr.flatten()
-    
+        
     # Ensure both arrays are the same length
     min_len = min(len(sc_manual), len(spec_centr))
     sc_manual = sc_manual[:min_len]
@@ -86,7 +86,9 @@ if __name__== "__main__":
         
         sc_manual = spectralCentroid(y, sr)
         spec_centr = librosa.feature.spectral_centroid(y=y, sr=sr)
-        #spec_centr = spec_centr[2, :]
+        
+        spec_centr = spec_centr[:, 2:]
+        
         
         rmse, coef = scCompare(sc_manual, spec_centr)
         
@@ -94,5 +96,7 @@ if __name__== "__main__":
         array_e.append(rmse)
         
         array_erros.append(array_e)
+        
+        music_test-=1
         
     save_to_csv(array_erros)
