@@ -8,83 +8,100 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy
 import os
+import csv
 from types import NoneType
 
-musicsfolder = "musics/"
+musicsfolder = "Music/"
+notNorm = "validação de resultados_TP2/notNormFM_All.csv"
 
 def extract_features(folder):
-    feature = []
-    y, sr = librosa.load(folder, sr = 22050)
+    feature = [0] * 190
+    sr = 22050
+
+    y, fs = librosa.load(folder, sr= sr)
+    index = 0
 
     mfc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
     for line in mfc:
         stats = statistics(line)
-        feature.extend(stats)
-    
-    spec_centr = librosa.feature.spectral_centroid(y=y, sr=sr)
-    stats = statistics(spec_centr)
-    feature.extend(stats)
+        feature[index : index + len(stats)] = stats
+        index += len(stats)
+     
+    spec_centr = librosa.feature.spectral_centroid(y=y)
+    stats = statistics(spec_centr.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
-    spec_band = librosa.feature.spectral_bandwidth(y=y, sr=sr)
-    stats = statistics(spec_band)
-    feature.extend(stats)
+    spec_band = librosa.feature.spectral_bandwidth(y=y)
+    stats = statistics(spec_band.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
-    spec_cont = librosa.feature.spectral_contrast(y=y, sr = sr)
-    stats = statistics(spec_cont)
-    feature.extend(stats)
+    spec_cont = librosa.feature.spectral_contrast(y=y)
+    for line in spec_cont:
+        stats = statistics(line)
+        feature[index : index + len(stats)] = stats
+        index += len(stats)
 
     spec_flat = librosa.feature.spectral_flatness(y=y)
-    stats = statistics(spec_flat)
-    feature.extend(stats)
+    stats = statistics(spec_flat.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
-    spec_roll = librosa.feature.spectral_rolloff(y=y, sr = sr)
-    stats = statistics(spec_roll)
-    feature.extend(stats)
+    spec_roll = librosa.feature.spectral_rolloff(y=y)
+    stats = statistics(spec_roll.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
-    fzero = librosa.yin(y=y,sr=sr,fmin=65,fmax=2093)
+    fzero = librosa.yin(y=y, sr = sr ,fmin = 20, fmax = sr / 2)
+    #f0[f0== fs/2] = 0
     stats = statistics(fzero)
-    feature.extend(stats)
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
     rms = librosa.feature.rms(y=y)
-    stats = statistics(rms)
-    feature.extend(stats)
+    stats = statistics(rms.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
 
     zcr = librosa.feature.zero_crossing_rate(y=y)
-    stats = statistics(zcr)
-    feature.extend(stats)
+    stats = statistics(zcr.flatten())
+    feature[index : index + len(stats)] = stats
+    index += len(stats)
     
-    tempo = librosa.feature.tempo(y=y, sr = sr)
-    feature.append(tempo[0])
+    tempo = librosa.feature.tempo(y=y)
+    feature[189] = tempo[0]
 
     return feature
 
 
 def statistics(feature):
-    feature = np.float64(feature).transpose()
-    stats = []
-    stats.append(np.mean(feature))
-    stats.append(np.std(feature))
+    stats = [0] * 7
+    stats[0] = np.mean(feature)
+    stats[1] = np.std(feature)
 
     temp = scipy.stats.skew(feature)
     if type(temp) == np.ndarray:
         temp = temp[0]
-    stats.append(temp)
+    stats[2] = temp
 
     temp = scipy.stats.kurtosis(feature)
     if type(temp) == np.ndarray:
         temp = temp[0]
-    stats.append(temp)
+    stats[3] = temp
 
-    stats.append(np.median(feature))
-    stats.append(np.max(feature))
-    stats.append(np.min(feature))
+    stats[4] = np.median(feature)
+    stats[5] = np.max(feature)
+    stats[6] = np.min(feature)
 
     return stats
 
 
 def save_to_csv(features_list, output_file="audio_features.csv"):
-    np.savetxt(output_file, features_list, "%.6f", delimiter=", ")
+    np.savetxt(output_file, features_list, "%.6f", delimiter=",")
     print(f"Features saved to {output_file}")
+
+
 
 
 def normalize(value ,col_min, col_max):
@@ -96,12 +113,6 @@ if __name__== "__main__":
     music_test = 900
     musics = os.listdir(musicsfolder)
     features = None
-
-    # for music in musics:
-    #     print(f"Processing: {music}")
-    #     path = os.path.join(musicsfolder, music)
-    #     feature = extract_features(path)
-    #     features.append(feature)
 
     for music in musics:
         if music_test == 0:
@@ -120,15 +131,17 @@ if __name__== "__main__":
         
         music_test-=1
 
-    maximos = []
-    minimos = []
+    save_to_csv(features)
+
+    maximos = [0] * 190
+    minimos = [0] * 190
 
     for column in range (features.shape[1]):
         col_min = np.min(features[:,column])
-        minimos.append(col_min)
+        minimos[column] = col_min
 
         col_max = np.max(features[:,column])
-        maximos.append(col_max)
+        maximos[column] = col_max
 
         if col_max == col_min:
             features[:, column] = 1
@@ -140,4 +153,4 @@ if __name__== "__main__":
             features[line , column] = new_value
 
     features = np.vstack((minimos, maximos, features))
-    save_to_csv(features)
+    
