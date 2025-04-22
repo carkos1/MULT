@@ -12,13 +12,13 @@ import csv
 from types import NoneType
 
 musicsfolder = "Music/"
-notNorm = "validação de resultados_TP2/notNormFM_All.csv"
+notNorm = "validação de resultados_TP2/notNormFM_All.csv"    
 
 def extract_features(folder):
     feature = [0] * 190
     sr = 22050
 
-    y, fs = librosa.load(folder, sr= sr)
+    y, sr = librosa.load(folder, sr= sr)
     index = 0
 
     mfc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
@@ -53,8 +53,14 @@ def extract_features(folder):
     feature[index : index + len(stats)] = stats
     index += len(stats)
 
-    fzero = librosa.yin(y=y, sr = sr ,fmin = 20, fmax = sr / 2)
-    #f0[f0== fs/2] = 0
+    fzero = librosa.yin(y=y ,fmin = librosa.note_to_hz('C2'), fmax = librosa.note_to_hz('C7'))
+
+    for i in range(fzero.shape[0]):
+        if fzero[i] > fs/2:
+            fzero[i] = 0
+
+    #fzero[fzero > fs/2] = 0
+    
     stats = statistics(fzero)
     feature[index : index + len(stats)] = stats
     index += len(stats)
@@ -97,11 +103,13 @@ def statistics(feature):
     return stats
 
 
-def save_to_csv(features_list, output_file="audio_features.csv"):
+def save_before_normalizing(features_list, output_file="notNormTest.csv"):
     np.savetxt(output_file, features_list, "%.6f", delimiter=",")
     print(f"Features saved to {output_file}")
 
-
+def save_to_csv(features_list, output_file="audio_features.csv"):
+    np.savetxt(output_file, features_list, "%.6f", delimiter=",")
+    print(f"Features saved to {output_file}")
 
 
 def normalize(value ,col_min, col_max):
@@ -118,11 +126,11 @@ if __name__== "__main__":
         if music_test == 0:
             break
 
-        print(f"Processing: {music}")
+        print(f"Processing: {music}, faltam {music_test} músicas...")
         path = os.path.join(musicsfolder, music)
 
         feature = extract_features(path)
-        print(f"Número de features: {len(feature)}")
+        print(f"Número de features extraídas: {len(feature)}")
         
         if type(features) == NoneType:
             features = np.array(feature)
@@ -131,7 +139,7 @@ if __name__== "__main__":
         
         music_test-=1
 
-    save_to_csv(features)
+    save_before_normalizing(features)
 
     maximos = [0] * 190
     minimos = [0] * 190
@@ -153,4 +161,4 @@ if __name__== "__main__":
             features[line , column] = new_value
 
     features = np.vstack((minimos, maximos, features))
-    
+    save_to_csv(features)
