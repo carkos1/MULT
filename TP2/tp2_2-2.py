@@ -14,7 +14,7 @@ from types import NoneType
 window_size = 2048
 hop_length = 512
 
-musicsfolder = "Music/"
+musicsfolder = "musics/"
 ranking_output = "rankings.txt"
 notNorm = "validação de resultados_TP2/notNormFM_All.csv"  
 
@@ -195,8 +195,38 @@ def rank_euc(de, dm, dc):
 
     return de_ranked, dm_ranked, dc_ranked
 
+def compareRecomendations(meta_query, meta_friend):
+
+    equality = 0
+
+    if meta_friend[1] == meta_query[1][1]:
+        equality+=1
+    
+    meta_friend[9] = meta_friend[9].strip('"')
+    m1 = meta_friend[9].split("; ")
+    meta_query[1][9] = meta_query[1][9].strip('"')
+    m2 = meta_query[1][9].split("; ")
+    
+    for i in range(len(m1)):
+        for j in range(len(m2)):
+            if m1[i] == m2[j]:
+                equality+=1
+
+    meta_friend[11] = meta_friend[11].strip('"')
+    m1 = meta_friend[11].split("; ")
+    meta_query[1][11] = meta_query[1][11].strip('"')
+    m2 = meta_query[1][11].split("; ")
+    
+    for i in range(len(m1)):
+        for j in range(len(m2)):
+            if m1[i] == m2[j]:
+                equality+=1
+    
+    return int(equality)
+
+
 if __name__== "__main__":
-    music_test = 900
+    music_test = 10
     musics = os.listdir(musicsfolder)
     features = None
     dist_calc = 1
@@ -206,7 +236,12 @@ if __name__== "__main__":
 
     fm_all = pd.read_csv('validação de resultados_TP2/FM_All.csv')
 
+    meta_query = np.genfromtxt("query_metadata.csv", dtype=str, encoding = None, delimiter=",")
+    metadata = np.genfromtxt("panda_dataset_taffc_metadata.csv", dtype=str, encoding = None, delimiter=",")
+    mdsim = []
+
     array_erros = []
+    n_music = 0
     
     for music in musics:
          
@@ -252,9 +287,14 @@ if __name__== "__main__":
         dist_array[1,dist_calc-1] = dm
         dist_array[2,dist_calc-1] = dc
 
+        sim = compareRecomendations(meta_query, metadata[dist_calc])
+        mdsim.append(sim)
+
         dist_calc += 1
         print("Música num:", dist_calc-1)
         music_test-=1
+        
+        n_music += 1
 
     save_before_normalizing(features)
 
@@ -311,4 +351,4 @@ if __name__== "__main__":
     save_to_csv(dm, "dm.csv")
     save_to_csv(dc, "dc.csv")
 
-    #meta_query=np.genfromtxt(StringIO("query_metadata.csv"), delimiter=",")
+    save_to_csv(mdsim, "mdSimilar.csv")
