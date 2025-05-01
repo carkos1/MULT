@@ -237,7 +237,9 @@ if __name__ == "__main__":
     metadata = np.genfromtxt("panda_dataset_taffc_metadata.csv", dtype=str, encoding = None, delimiter=",")
     mdsim = np.zeros((music_test) + 1) 
 
-    array_erros = np.zeros(music_test, 2)
+    query_music = meta_query[1][0]
+
+    array_erros = np.zeros((music_test, 2))
     dm_musics = ["" for i in range(10)]
     de_musics = ["" for i in range(10)]
     dc_musics = ["" for i in range(10)]
@@ -327,12 +329,15 @@ if __name__ == "__main__":
 
     de_ind, dm_ind, dc_ind = rank_euc(de, dm, dc)
 
-    print(de_ind)
-
-    top_sim = mdsim.argsort()[1::-1]
+    top_sim = mdsim.argsort()[::-1]
 
     for i in range(10):
-        sim_musics[i] = metadata[top_sim[i] + 1][0] 
+        if metadata[top_sim[i] + 1][0] == query_music:
+            j = i
+            continue
+        sim_musics[i] = metadata[top_sim[i] + 1][0]
+        if i == 10:
+            sim_musics[j] = metadata[top_sim[i] + 1][0]
 
     for i in range(1,11):
         de_musics[i-1] = metadata[de_ind[i] + 1][0]  
