@@ -1,0 +1,57 @@
+## Apontamentos exercício 4 - MULT
+
+#4.1 (Para a Próxima semana)
+Definir Ranking ideal (objetivamente)
+Ranking Subetivo que nós é que vemos
+
+Objetivamente -> Ter em conta os metadados
+os da Query e os da DB completa
+
+3 coisas nos metadados:
+Artista
+MoodStrSplit
+GemresStr
+
+Comparar os metadados:
+cada cena em comum é 1 ponto
+
+definir um ranking 10 músicas com base nos metadados
+ md_im
+metadata simularity com o score
+
+Realizar ranking de meta dados como os outros rankings
+
+(pode não dar as mesmas músicas do stor e não está mal) desde que sejam vários com 7 pontos e duas com 3 pontos
+
+precision é calculado com base no ranking dos metadados comparar com os outros rankings
+e calcular
+
+metadata e cos é 20%
+metadata e man é 20%
+metadata e euc é 20%
+
+Metadados "International" é vago. Emoção "Circular" é ambiguo.
+
+Daí temos a avaliação subjetiva
+
+#4.2 (Apenas para incluir no relatório, não tem defesa)
+Avaliar os resultados que o sistema dá:
+
+Ver os rankings, ouvir as músicas e dar uma nota de 1 a 5 em termos da recomendação - Guiar pelo feeling
+Beat parecido, Artisto é o mesmo, O género, a Melodia etc... cada um é que sabe se acha q vale a pena e fazer uma tabela
+
+Tabela com as 10 músicas, as notas de cada membro do grupo, a média e a Std
+
+3 tabelas para cada distância
+
+*** Não alterar ranks para a mesma música comuns às várias dist***
+
+Definir um score mínimo de 3 na 4.2.1 b)
+
+tudo oq tenha pelo menos 3 é relevante
+
+6 músicas relevantes de 10 seria precision de 60%
+
+posteriormente calcular a precisão com base na subjetividade
+
+e discutir

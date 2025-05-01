@@ -1,0 +1,33 @@
+apontamentos para meta 3
+
+netrias de similaridade
+
+3 1
+formulas dos slides ou usar funções pre existentes de bibliotecas
+
+dist entre feature vec do stor e de cada uma das musicas extraídas e normalizadas usar só os fiheiros do stor
+
+3 2 2
+gerar 3 fiheiros dist nanhatan / dist eucl / dist cos
+
+3 3
+
+rankis de similaridade recomendação para 10 musicas ordenas distancias e escolher as 11 pq a query já lá está np.argsort q dá os indicadores q já estão ordenados
+
+apenas as 11 são uteis e guardar num ficheiro descartar a primeira musica que é a seed
+
+fazer o mesmo para o resto.
+
+3 5
+apontar analisar e discutir primeiro escrever o que vemos (ser o mais objetivo e quantificar) e dps analisar (justificar o pq dos resultados obtidos)
+
+
+f0[f0 == ax = 0
+
+tirar o apend 190 features e ir alterando as o espaço [i]
+
+tirar a transposta e deixar só o mean
+
+list dir para tirar o 900 e n ficar hard codded
+
+dois primeiros resultados do librosa é excluir pq vêm do padding atrás q ele faz 
