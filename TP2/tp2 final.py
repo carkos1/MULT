@@ -14,7 +14,7 @@ from types import NoneType
 window_size = 2048
 hop_length = 512
 
-musicsfolder = "musics/"
+musicsfolder = "Music/"
 ranking_output = "rankings.txt"
 notNorm = "validação de resultados_TP2/notNormFM_All.csv"  
 
@@ -199,6 +199,9 @@ def compareRecomendations(meta_query, meta_friend):
 
     equality = 0
 
+    if meta_friend[0].strip(" \"") == meta_query[1][0].strip(" \""):
+        return -1
+
     if meta_friend[1].strip(" \"") == meta_query[1][1].strip(" \""):
         equality+=1
     
@@ -215,7 +218,7 @@ def compareRecomendations(meta_query, meta_friend):
 
     for i in range(len(m1)):
         for j in range(len(m2)):
-            if m2[j].strip(" \"") in m1[i].strip(" \"") :
+            if m1[i].strip(" \"") in m2[j].strip(" \"") :
                 equality+=1
     
     return int(equality)
@@ -331,21 +334,12 @@ if __name__ == "__main__":
 
     top_sim = mdsim.argsort()[::-1]
 
-    for i in range(10):
-        if metadata[top_sim[i] + 1][0] == query_music:
-            j = i
-            continue
-        sim_musics[i] = metadata[top_sim[i] + 1][0]
-        if i == 10:
-            sim_musics[j] = metadata[top_sim[i] + 1][0]
-
     for i in range(1,11):
+        sim_musics[i-1] = metadata[top_sim[i-1] + 1][0]
         de_musics[i-1] = metadata[de_ind[i] + 1][0]  
         dm_musics[i-1] = metadata[dm_ind[i] + 1][0]
         dc_musics[i-1] = metadata[dc_ind[i] + 1][0]
     
-
-    print(de_musics)
 
     for i in de_musics: 
         if i in sim_musics:
@@ -373,7 +367,7 @@ if __name__ == "__main__":
             f.write(str(dc[dc_ind[1:11]]))
             f.write("\nRanked: Metadata\n")
             f.write(str(sim_musics))
-            f.write(str(mdsim[top_sim[:10]]))
+            f.write(str(mdsim[top_sim[0:10]]))
             f.write("\n\nPrecision de: " + str(de_precision) + "%")
             f.write("\nPrecision dm: " + str(dm_precision) + "%")
             f.write("\nPrecision dc: " + str(dc_precision) + "%")
@@ -391,7 +385,7 @@ if __name__ == "__main__":
             f.write(str(dc[dc_ind[1:11]]))
             f.write("\nRanked: Metadata\n")
             f.write(str(sim_musics))
-            f.write(str(mdsim[top_sim[:10]]))
+            f.write(str(mdsim[top_sim[0:10]]))
             f.write("\n\nPrecision de: " + str(de_precision) + "%")
             f.write("\nPrecision dm: " + str(dm_precision) + "%")
             f.write("\nPrecision dc: " + str(dc_precision) + "%")
