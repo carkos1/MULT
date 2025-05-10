@@ -14,7 +14,7 @@ from types import NoneType
 window_size = 2048
 hop_length = 512
 
-musicsfolder = "Music/"
+musicsfolder = "musics/"
 ranking_output = "rankings.txt"
 notNorm = "validação de resultados_TP2/notNormFM_All.csv"  
 
